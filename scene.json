@@ -1,0 +1,27 @@
+{
+  "display": {
+    "title": "tetromino""
+  },
+  "owner": "",
+  "contact": {
+    "name": "Esteban",
+    "email": "esteban@decentraland.org"
+  },
+  "scene": {
+    "parcels": [
+      "2,16", "3,16", "2,15", "3,15"
+    ],
+    "base": "2,16"
+  },
+  "communications": {
+    "type": "webrtc",
+    "signalling": "https://rendezvous.decentraland.org"
+  },
+  "policy": {
+    "fly": true,
+    "voiceEnabled": true,
+    "blacklist": [],
+    "teleportPosition": "0,0,0"
+  },
+  "main": "scene.js"
+}
