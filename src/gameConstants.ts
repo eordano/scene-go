@@ -87,7 +87,7 @@ export default {
 	shapesMapping: [
 		'straight', 'square', 'cross', 'leftGun', 'rightGun', 'leftSnake', 'rightSnake',
 	],
-	timeDrop: 100,
+	timeDrop: 500,
 	tetrominos,
 	initialGrid,
 };

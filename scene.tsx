@@ -5,7 +5,7 @@ import ReduxThunk from 'redux-thunk'
 
 import TetrisApp from './src/reducers'
 import { TetrisState } from './src/types'
-import { startGame, rotateTetromino, moveRight, moveDown, changePauseState, moveLeft, loadMenu, dropTetromino } from 'src/actions';
+import { startGame, rotateTetromino, moveTetromino, changePauseState, loadMenu, dropTetromino } from 'src/actions';
 import { BuildTetromino, BuildTetrominoGrid } from 'src/components/Tetromino';
 import gameConstants from 'src/gameConstants';
 
@@ -34,13 +34,13 @@ export default class Tetris extends ScriptableScene<any, TetrisState> {
           this.store!.dispatch(startGame())
           break
         case 'left':
-          this.store!.dispatch(moveLeft())
+          this.store!.dispatch(moveTetromino('left'))
           break
         case 'right':
-          this.store!.dispatch(moveRight())
+          this.store!.dispatch(moveTetromino('right'))
           break
         case 'down':
-          this.store!.dispatch(moveDown())
+          this.store!.dispatch(moveTetromino('down'))
           break
         case 'rotate':
           this.store!.dispatch(rotateTetromino())
@@ -60,7 +60,6 @@ export default class Tetris extends ScriptableScene<any, TetrisState> {
   async render() {
     return (
       <scene>
-        <GameStatus { ...this.state } />
         <StartButton { ...this.state } />
         <NextTetromino { ...this.state } />
         <CurrentTetromino { ...this.state } />
@@ -72,17 +71,18 @@ export default class Tetris extends ScriptableScene<any, TetrisState> {
 }
 
 function PlayButtons(props: any) {
-  return <entity position={{x: 8, y: 0, z: -8 }}>
-    <box position={{ x: 1, y: 3, z: 1 }} id='left' color={'#00FF00'} {...props} />
-    <box position={{ x: 0, y: 3, z: 1 }} id='rotate' color={'#ffFFff'} {...props} />
-    <box position={{ x: -1, y: 3, z: 1 }} id='right' color={'#ffFF00'} {...props} />
-    <box position={{ x: 0, y: 2, z: 1 }} id='down' color={'#00FFff'} {...props} />
+  return <entity position={{x: 5, y: 3, z: 4 }}>
+    <material id="transparent" alpha={0.7} />
+    <box position={{ x: 1, y: 3, z: 1 }} material="#transparent" withCollisions={false} id='left' color={'#00FF00'} {...props} />
+    <box position={{ x: 0, y: 3, z: 1 }} material="#transparent" withCollisions={false} id='rotate' color={'#ffFFff'} {...props} />
+    <box position={{ x: -1, y: 3, z: 1 }} material="#transparent" withCollisions={false} id='right' color={'#ffFF00'} {...props} />
+    <box position={{ x: 0, y: 2, z: 1 }} material="#transparent" withCollisions={false} id='down' color={'#00FFff'} {...props} />
   </entity>
 }
 
-function GameStatus(props: any) {
-  return <box position={{ x: 5, y: 0, z: 1 }} color={props.status === 'PLAYING' ? '#ff0000' : '#0000ff'} {...props} />
-}
+// function GameStatus(props: any) {
+//   return <box position={{ x: 5, y: 0, z: 1 }} color={props.status === 'PLAYING' ? '#ff0000' : '#0000ff'} {...props} />
+// }
 
 function StartButton(props: any) {
   if (props.gameStatus === 'PLAYING') return <entity id='start' />
@@ -94,7 +94,7 @@ function CurrentTetromino(opts: any) {
   if (!tetromino || opts.gameStatus !== 'PLAYING') {
     return
   }
-  return <entity rotation={{ x: 180, y: 0, z: 0 }} position={{ x: 10, y: 15, z: -5 }}>
+  return <entity rotation={{ x: 180, y: 0, z: 0 }} position={{ x: 7, y: 11, z: 5 }}>
     { BuildTetromino({tetromino}) }
   </entity>
 }
@@ -104,7 +104,8 @@ function AllTetrominos(opts: TetrisState) {
   if (opts.gameStatus === 'IDLE' || !allTetrominos) {
     return
   }
-  return <entity rotation={{ x: 180, y: 180, z: 90}} position={{x: 10, y: 15, z: -5 }}> 
+  return <entity rotation={{ x: 180, y: 180, z: 90}} position={{x: 7, y: 11, z: 5 }}> 
+    <box position={{ x: 5, y: 2.25, z: -0.5 }} scale={{ x: 12, y: 5.5, z: 0 }} color='#000000' />
     {BuildTetrominoGrid({allTetrominos})}
   </entity>
 }
@@ -114,7 +115,7 @@ function NextTetromino(opts: any) {
   if (opts.gameStatus !== 'PLAYING') {
     return
   }
-  return <entity position={{x: 0, y: 0, z: -8 }}>
+  return <entity position={{x: -2, y: 1, z: 4 }}>
     { BuildTetromino({tetromino}) }
   </entity>
 }
