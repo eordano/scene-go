@@ -3,55 +3,40 @@ import { createElement, ScriptableScene } from 'metaverse-api'
 import { createStore, applyMiddleware, Store, AnyAction } from 'redux'
 import ReduxThunk from 'redux-thunk'
 
-import TetrisApp from './src/reducers'
-import { TetrisState } from './src/types'
-import { startGame, rotateTetromino, moveTetromino, changePauseState, loadMenu, dropTetromino } from 'src/actions';
-import { BuildTetromino, BuildTetrominoGrid } from 'src/components/Tetromino';
-import gameConstants from 'src/gameConstants';
+import { reducer, GameState, getPositionFromString, Board, Color, getPositionAsString, white, black, empty } from './src/reducers'
 
-export default class Tetris extends ScriptableScene<any, TetrisState> {
-  store?: Store<any, AnyAction>
+export default class Tetris extends ScriptableScene<any, any> {
+  store?: Store<GameState, AnyAction>
 
-  sceneDidMount() {
+  constructor(opts: any, ...other: any[]) {
+    super(opts, ...other)
     this.store = createStore(
-      TetrisApp,
+      reducer,
       applyMiddleware(ReduxThunk)
     )
-    this.state = this.store.getState() as TetrisState
+    this.setState(this.store!.getState() as GameState)
+    this.store!.dispatch({ restart: true, type: 'restart' })
+  }
 
-    this.store.subscribe(() => {
+  sceneDidMount() {
+    this.store!.subscribe(() => {
       console.log('new state: ', this.store!.getState())
       this.setState(this.store!.getState())
     })
 
-    setInterval(() => {
-      dropTetromino(this.store!.dispatch, this.store!.getState)
-    }, gameConstants.timeDrop)
-
     this.subscribeTo('click', async (e) => {
+      const turn = this.store!.getState().turn
       switch (e.elementId) {
-        case 'start':
-          this.store!.dispatch(startGame())
+        case 'pass':
+          this.store!.dispatch({ pass: true, color: turn, type: 'pass' })
           break
-        case 'left':
-          this.store!.dispatch(moveTetromino('left'))
-          break
-        case 'right':
-          this.store!.dispatch(moveTetromino('right'))
-          break
-        case 'down':
-          this.store!.dispatch(moveTetromino('down'))
-          break
-        case 'rotate':
-          this.store!.dispatch(rotateTetromino())
-          break
-        case 'pause':
-          this.store!.dispatch(changePauseState())
-          break
-        case 'exit':
-          this.store!.dispatch(loadMenu())
+        case 'restart':
+          this.store!.dispatch({ restart: true, type: 'restart' })
           break
         default:
+          if (e.elementId && e.elementId.startsWith('empty_')) {
+              this.store!.dispatch({ color: turn, type: 'move', position: getPositionFromString(e.elementId.substr(6)) })
+          }
           break
       }
     })
@@ -60,62 +45,62 @@ export default class Tetris extends ScriptableScene<any, TetrisState> {
   async render() {
     return (
       <scene>
-        <StartButton { ...this.state } />
-        <NextTetromino { ...this.state } />
-        <CurrentTetromino { ...this.state } />
-        <AllTetrominos { ...this.state } />
-        <PlayButtons {...this.state} />
+        <PassButton { ...this.state } />
+        <Restart { ...this.state } />
+        <BoardF {...this.state} />
       </scene>
     )
   }
 }
 
-function PlayButtons(props: any) {
-  return <entity position={{x: 5, y: 3, z: 4 }}>
-    <material id="transparent" alpha={0.7} />
-    <box position={{ x: 1, y: 3, z: 1 }} material="#transparent" withCollisions={false} id='left' color={'#00FF00'} {...props} />
-    <box position={{ x: 0, y: 3, z: 1 }} material="#transparent" withCollisions={false} id='rotate' color={'#ffFFff'} {...props} />
-    <box position={{ x: -1, y: 3, z: 1 }} material="#transparent" withCollisions={false} id='right' color={'#ffFF00'} {...props} />
-    <box position={{ x: 0, y: 2, z: 1 }} material="#transparent" withCollisions={false} id='down' color={'#00FFff'} {...props} />
-  </entity>
+function PassButton() {
+    return <box id="pass" position={{ x: 0.5, y: 15, z: 0.5 }} color='#0000FF' />
 }
 
-// function GameStatus(props: any) {
-//   return <box position={{ x: 5, y: 0, z: 1 }} color={props.status === 'PLAYING' ? '#ff0000' : '#0000ff'} {...props} />
-// }
-
-function StartButton(props: any) {
-  if (props.gameStatus === 'PLAYING') return <entity id='start' />
-  else return <box position={{ x: 4, y: 2, z: 2 }} id='start' color='#ff0000' />
+function Restart() {
+    return <box id="restart" position={{ x: 1.5, y: 15, z: 0.5 }} color='#ff0000' />
 }
 
-function CurrentTetromino(opts: any) {
-  const tetromino = opts.currentTetromino
-  if (!tetromino || opts.gameStatus !== 'PLAYING') {
-    return
-  }
-  return <entity rotation={{ x: 180, y: 0, z: 0 }} position={{ x: 7, y: 11, z: 5 }}>
-    { BuildTetromino({tetromino}) }
-  </entity>
+const WHITE = '#FAFAFA'
+const BLACK = '#2f2f2f'
+
+function BoardF(state: { board: Board } ) {
+    console.log(arguments)
+    return <entity
+      position={{ x: 1.5, y: 0, z: 1.5 }}
+    >
+        <material id="transparent" alpha={0} />
+        <material id="board" albedoTexture="board.jpg" />
+        <basic-material id="backboard" texture="board.jpg" />
+        <box material="#board" position={{ x: 8.46, y: 0.01, z: 8.48 }} scale={{ x: 19.25, y: 0.001, z: 19.2 }} />
+        <entity position={{ x: -0.5, y: 0, z: -0.5 }}>
+          { state.board && state.board.map((row, rowIndex) => <entity>{ row.map((color, colIndex) => token(rowIndex, colIndex, color)) }</entity>) }
+        </entity>
+    </entity>
 }
 
-function AllTetrominos(opts: TetrisState) {
-  const allTetrominos = opts.activeTetrominos!
-  if (opts.gameStatus === 'IDLE' || !allTetrominos) {
-    return
-  }
-  return <entity rotation={{ x: 180, y: 180, z: 90}} position={{x: 7, y: 11, z: 5 }}> 
-    <box position={{ x: 5, y: 2.25, z: -0.5 }} scale={{ x: 12, y: 5.5, z: 0 }} color='#000000' />
-    {BuildTetrominoGrid({allTetrominos})}
-  </entity>
-}
+const TRANSPARENT = '#FF00FF'
 
-function NextTetromino(opts: any) {
-  const tetromino = opts.nextTetromino
-  if (opts.gameStatus !== 'PLAYING') {
-    return
-  }
-  return <entity position={{x: -2, y: 1, z: 4 }}>
-    { BuildTetromino({tetromino}) }
-  </entity>
+function token(rowIndex: number, colIndex: number, color: Color) {
+    const pos = getPositionAsString({ x: rowIndex, y: colIndex })
+    const id = color + '_' + pos
+    const colorValue = (color === white) ? WHITE : (color === black) ? BLACK : TRANSPARENT
+    if (color === empty) {
+        return <box
+            position={{ x: colIndex, y: 0.1, z: rowIndex }}
+            scale={{ x: 1, y: 0.01, z: 1 }}
+            id={id}
+            color={colorValue}
+            material={ colorValue === TRANSPARENT ? '#transparent' : '' }
+        />
+    }
+    return <cylinder
+        segmentsRadial={16}
+        segmentsHeight={1}
+        radius={0.5}
+        position={{ x: colIndex, y: 0.1, z: rowIndex }}
+        scale={{ x: 1, y: 0.01, z: 1 }}
+        id={id}
+        color={colorValue}
+    />
 }

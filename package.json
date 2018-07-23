@@ -9,7 +9,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "metaverse-api": "^4.0.0",
+    "metaverse-api": "^4.0.0-20180717164432.commit-019c8b1",
     "typescript": "^2.7.2"
   },
   "dependencies": {
