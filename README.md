@@ -1,3 +1,5 @@
-# Decentratris
+# scene: go game
 
-The famous tetromino game.
+The famous go game.
+
+https://en.wikipedia.org/wiki/Go_(game)
