@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "description": "My new Decentraland project",
   "scripts": {
-    "build": "metaverse-compiler build.json",
-    "watch": "metaverse-compiler build.json --watch"
+    "start": "echo \"{\\\"trackStats\\\": false}\" >> ~/.dclinfo && dcl start",
+    "build": "decentraland-compiler build.json",
+    "watch": "decentraland-compiler build.json --watch"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "metaverse-api": "^4.0.0-20180717164432.commit-019c8b1",
-    "typescript": "^2.7.2"
+    "decentraland-api": "next",
+    "decentraland": "next"
   },
   "dependencies": {
     "redux": "^4.0.0",

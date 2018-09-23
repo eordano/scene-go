@@ -1,9 +1,19 @@
-import { createElement, ScriptableScene } from 'metaverse-api'
+import { createElement, ScriptableScene } from 'decentraland-api'
 
 import { createStore, applyMiddleware, Store, AnyAction } from 'redux'
 import ReduxThunk from 'redux-thunk'
 
-import { reducer, GameState, getPositionFromString, Board, Color, getPositionAsString, white, black, empty } from './src/reducers'
+import {
+    reducer,
+    GameState,
+    getPositionFromString,
+    Board,
+    Color,
+    getPositionAsString,
+    white,
+    black,
+    empty
+} from './src/reducers'
 
 export default class Tetris extends ScriptableScene<any, any> {
   store?: Store<GameState, AnyAction>
@@ -20,7 +30,6 @@ export default class Tetris extends ScriptableScene<any, any> {
 
   sceneDidMount() {
     this.store!.subscribe(() => {
-      console.log('new state: ', this.store!.getState())
       this.setState(this.store!.getState())
     })
 
@@ -65,16 +74,21 @@ const WHITE = '#FAFAFA'
 const BLACK = '#2f2f2f'
 
 function BoardF(state: { board: Board } ) {
-    console.log(arguments)
     return <entity
       position={{ x: 1.5, y: 0, z: 1.5 }}
     >
         <material id="transparent" alpha={0} />
-        <material id="board" albedoTexture="board.jpg" />
         <basic-material id="backboard" texture="board.jpg" />
-        <box material="#board" position={{ x: 8.46, y: 0.01, z: 8.48 }} scale={{ x: 19.25, y: 0.001, z: 19.2 }} />
+        <box material="#backboard"
+             position={{ x: 8.46, y: 0.01, z: 8.48 }}
+            scale={{ x: 19.25, y: 0.001, z: 19.2 }}
+        />
         <entity position={{ x: -0.5, y: 0, z: -0.5 }}>
-          { state.board && state.board.map((row, rowIndex) => <entity>{ row.map((color, colIndex) => token(rowIndex, colIndex, color)) }</entity>) }
+          { state.board && state.board.map(
+              (row, rowIndex) => <entity>{
+                  row.map((color, colIndex) => token(rowIndex, colIndex, color))
+              }</entity>)
+          }
         </entity>
     </entity>
 }

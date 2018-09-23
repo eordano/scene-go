@@ -1,8 +1,8 @@
 [
-    {
-        "name": "Compile systems",
-        "kind": "Webpack",
-        "file": "./scene.tsx",
-        "target": "webworker"
-    }
+  {
+    "name": "Compile systems",
+    "kind": "Webpack",
+    "file": "./scene.tsx",
+    "target": "webworker"
+  }
 ]
