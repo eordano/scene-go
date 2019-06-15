@@ -10,11 +10,11 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "decentraland-api": "next",
+    "decentraland-ecs": "next",
     "decentraland": "next"
   },
   "dependencies": {
-    "redux": "^4.0.0",
+    "redux": "^4.0.1",
     "redux-thunk": "^2.3.0"
   }
 }
